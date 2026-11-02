@@ -285,6 +285,44 @@ USING (
     )
 );
 
+DROP POLICY IF EXISTS "Users create messages in own conversations" ON public.messages;
+CREATE POLICY "Users create messages in own conversations"
+ON public.messages
+FOR INSERT
+TO authenticated
+WITH CHECK (
+    EXISTS (
+        SELECT 1
+        FROM public.conversations c
+        WHERE c.id = messages.conversation_id
+          AND c.user_id = (SELECT auth.uid())
+    )
+);
+
+DROP POLICY IF EXISTS "Users update assistant messages in own conversations" ON public.messages;
+CREATE POLICY "Users update assistant messages in own conversations"
+ON public.messages
+FOR UPDATE
+TO authenticated
+USING (
+    role = 'assistant'
+    AND EXISTS (
+        SELECT 1
+        FROM public.conversations c
+        WHERE c.id = messages.conversation_id
+          AND c.user_id = (SELECT auth.uid())
+    )
+)
+WITH CHECK (
+    role = 'assistant'
+    AND EXISTS (
+        SELECT 1
+        FROM public.conversations c
+        WHERE c.id = messages.conversation_id
+          AND c.user_id = (SELECT auth.uid())
+    )
+);
+
 -- Attachments: users can read metadata for their own files.
 CREATE POLICY "Users read own attachments"
 ON public.attachments
@@ -315,6 +353,13 @@ WITH CHECK (
           AND c.user_id = (SELECT auth.uid())
     )
 );
+
+DROP POLICY IF EXISTS "Users create own usage logs" ON public.usage_logs;
+CREATE POLICY "Users create own usage logs"
+ON public.usage_logs
+FOR INSERT
+TO authenticated
+WITH CHECK (user_id = (SELECT auth.uid()));
 
 -- =========================================
 -- DATABASE FUNCTIONS

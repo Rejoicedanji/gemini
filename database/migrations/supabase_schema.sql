@@ -24,7 +24,7 @@
 --    SUPABASE_URL=your_supabase_project_url
 --    SUPABASE_ANON_KEY=your_supabase_anon_key
 --    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
---    
+
 --    CLIENT_URL=http://localhost:5173
 
 -- 5. Get your Gemini API key:
